@@ -1,6 +1,131 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
+    <title>JUC并发包学习</title>
+    <url>/2022/03/15/JUC%E5%B9%B6%E5%8F%91%E5%8C%85%E5%AD%A6%E4%B9%A0/</url>
+    <content><![CDATA[<h1 id="一-进程与线程"><a href="#一-进程与线程" class="headerlink" title="一. 进程与线程"></a>一. 进程与线程</h1><h3 id="1-进程和线程的概念"><a href="#1-进程和线程的概念" class="headerlink" title="1. 进程和线程的概念"></a>1. 进程和线程的概念</h3><h4 id="进程"><a href="#进程" class="headerlink" title="进程"></a><strong>进程</strong></h4><ul>
+<li><p>程序由指令和数据组成，但这些指令要运行，数据要读写，就必须将指令加载至 CPU，数据加载至内存。在指令运行过程中还需要用到磁盘、网络等设备。进程就是用来加载指令、管理内存、管理 IO 的</p>
+</li>
+<li><p>当一个程序被运行，从磁盘加载这个程序的代码至内存，这时就开启了一个进程。</p>
+</li>
+<li><p>进程就可以视为程序的一个实例。大部分程序可以同时运行多个实例进程（例如记事本、画图、浏览器</p>
+</li>
+</ul>
+<p>等），也有的程序只能启动一个实例进程（例如网易云音乐、360 安全卫士等）</p>
+<h4 id="线程"><a href="#线程" class="headerlink" title="线程"></a><strong>线程</strong></h4><ul>
+<li><p>一个进程之内可以分为一到多个线程。</p>
+</li>
+<li><p>一个线程就是一个指令流，将指令流中的一条条指令以一定的顺序交给 CPU 执行</p>
+</li>
+<li><p>Java 中，线程作为最小调度单位，进程作为资源分配的最小单位。 在 windows 中进程是不活动的，只是作</p>
+</li>
+</ul>
+<p>为线程的容器</p>
+<h4 id="二者对比"><a href="#二者对比" class="headerlink" title="二者对比"></a><strong>二者对比</strong></h4><ul>
+<li><p>进程基本上相互独立的，而线程存在于进程内，是进程的一个子集</p>
+</li>
+<li><p>进程拥有共享的资源，如内存空间等，供其内部的线程共享</p>
+</li>
+<li><p>进程间通信较为复杂</p>
+<ul>
+<li><p>同一台计算机的进程通信称为 IPC（Inter-process communication）</p>
+</li>
+<li><p>不同计算机之间的进程通信，需要通过网络，并遵守共同的协议，例如 HTTP</p>
+</li>
+</ul>
+</li>
+<li><p>线程通信相对简单，因为它们共享进程内的内存，一个例子是多个线程可以访问同一个共享变量</p>
+</li>
+<li><p>线程更轻量，线程上下文切换成本一般上要比进程上下文切换低</p>
+</li>
+</ul>
+<h3 id="2-并行和并发的概念"><a href="#2-并行和并发的概念" class="headerlink" title="2. 并行和并发的概念"></a>2. 并行和并发的概念</h3><p>单核 cpu 下，线程实际还是 串行执行 的。操作系统中有一个组件叫做任务调度器，将 cpu 的时间片（windows下时间片最小约为 15 毫秒）分给不同的程序使用，只是由于 cpu 在线程间（时间片很短）的切换非常快，人类感觉是 同时运行的 。总结为一句话就是： 微观串行，宏观并行 ，一般会将这种 线程轮流使用 CPU 的做法称为并发， concurrent多核 cpu下，每个 核（core） 都可以调度运行线程，这时候线程可以是并行的。</p>
+<h3 id="3-线程基本应用"><a href="#3-线程基本应用" class="headerlink" title="3. 线程基本应用"></a>3. 线程基本应用</h3><h4 id="3-1-应用之异步调用"><a href="#3-1-应用之异步调用" class="headerlink" title="3.1 应用之异步调用"></a>3.1 应用之异步调用</h4><p>以调用方角度来讲，如果</p>
+<p>需要等待结果返回，才能继续运行就是同步</p>
+<p>不需要等待结果返回，就能继续运行就是异步</p>
+<p><strong>1)</strong> <strong>设计</strong></p>
+<p>多线程可以让方法执行变为异步的（即不要巴巴干等着）比如说读取磁盘文件时，假设读取操作花费了 5 秒钟，如</p>
+<p>果没有线程调度机制，这 5 秒 cpu 什么都做不了，其它代码都得暂停…</p>
+<p><strong>2)</strong> <strong>结论</strong></p>
+<p>比如在项目中，视频文件需要转换格式等操作比较费时，这时开一个新线程处理视频转换，避免阻塞主线程</p>
+<p>tomcat 的异步 servlet 也是类似的目的，让用户线程处理耗时较长的操作，避免阻塞 tomcat 的工作线程</p>
+<p>ui 程序中，开线程进行其他操作，避免阻塞 ui 线程</p>
+<h4 id="4-Java线程"><a href="#4-Java线程" class="headerlink" title="4. Java线程"></a>4. Java线程</h4><h5 id="4-1-创建和运行线程"><a href="#4-1-创建和运行线程" class="headerlink" title="4.1  创建和运行线程"></a>4.1  创建和运行线程</h5><h5 id="方法一，直接使用-Thread"><a href="#方法一，直接使用-Thread" class="headerlink" title="方法一，直接使用 Thread"></a><strong>方法一，直接使用</strong> <strong>Thread</strong></h5><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">// 创建线程对象</span></span><br><span class="line">Thread t = <span class="keyword">new</span> Thread() &#123;</span><br><span class="line"> <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line"> <span class="comment">// 要执行的任务</span></span><br><span class="line"> &#125;</span><br><span class="line">&#125;;</span><br><span class="line"><span class="comment">// 启动线程</span></span><br><span class="line">t.start();</span><br></pre></td></tr></table></figure>
+
+<h5 id="方法二，使用-Runnable-配合-Thread"><a href="#方法二，使用-Runnable-配合-Thread" class="headerlink" title="方法二，使用 Runnable 配合 Thread"></a><strong>方法二，使用</strong> <strong>Runnable</strong> <strong>配合</strong> <strong>Thread</strong></h5><figure class="highlight java"><table><tr><td class="code"><pre><span class="line">Runnable runnable = <span class="keyword">new</span> Runnable() &#123;</span><br><span class="line"> <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span></span>&#123;</span><br><span class="line"> <span class="comment">// 要执行的任务</span></span><br><span class="line"> &#125;</span><br><span class="line">&#125;;</span><br><span class="line"><span class="comment">// 创建线程对象</span></span><br><span class="line">Thread t = <span class="keyword">new</span> Thread( runnable );</span><br><span class="line"><span class="comment">// 启动线程</span></span><br><span class="line">t.start();</span><br></pre></td></tr></table></figure>
+
+<p>Java 8 以后可以使用 lambda 精简代码</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">// 创建任务对象</span></span><br><span class="line">Runnable task2 = () -&gt; log.debug(<span class="string">&quot;hello&quot;</span>);</span><br><span class="line"><span class="comment">// 参数1 是任务对象; 参数2 是线程名字，推荐</span></span><br><span class="line">Thread t2 = <span class="keyword">new</span> Thread(task2, <span class="string">&quot;t2&quot;</span>);</span><br><span class="line">t2.start();</span><br></pre></td></tr></table></figure>
+
+<h5 id="原理之-Thread-与-Runnable-的关系"><a href="#原理之-Thread-与-Runnable-的关系" class="headerlink" title="***** 原理之 Thread 与 Runnable 的关系"></a>***** <strong>原理之</strong> <strong>Thread</strong> <strong>与</strong> <strong>Runnable</strong> <strong>的关系</strong></h5><p>分析 Thread 的源码，理清它与 Runnable 的关系</p>
+<p><strong>小结</strong></p>
+<p>方法1 是把线程和任务合并在了一起，方法2 是把线程和任务分开了</p>
+<p>用 Runnable 更容易与线程池等高级 API 配合</p>
+<p>用 Runnable 让任务类脱离了 Thread 继承体系，更灵活</p>
+<h5 id="方法三，-FutureTask-配合-Thread"><a href="#方法三，-FutureTask-配合-Thread" class="headerlink" title="方法三，****FutureTask 配合 Thread"></a><strong>方法三，****FutureTask</strong> <strong>配合</strong> <strong>Thread</strong></h5><p>FutureTask 能够接收 Callable 类型的参数，用来处理有返回结果的情况</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">// 创建任务对象</span></span><br><span class="line">FutureTask&lt;Integer&gt; task3 = <span class="keyword">new</span> FutureTask&lt;&gt;(() -&gt; &#123;</span><br><span class="line"> log.debug(<span class="string">&quot;hello&quot;</span>);</span><br><span class="line"> <span class="keyword">return</span> <span class="number">100</span>;</span><br><span class="line">&#125;);</span><br><span class="line"><span class="comment">// 参数1 是任务对象; 参数2 是线程名字，推荐</span></span><br><span class="line"><span class="keyword">new</span> Thread(task3, <span class="string">&quot;t3&quot;</span>).start();</span><br><span class="line"><span class="comment">// 主线程阻塞，同步等待 task 执行完毕的结果</span></span><br><span class="line">Integer result = task3.get();</span><br><span class="line">log.debug(<span class="string">&quot;结果是:&#123;&#125;&quot;</span>, result);</span><br></pre></td></tr></table></figure>
+
+<h4 id="4-2-查看进程线程的方法"><a href="#4-2-查看进程线程的方法" class="headerlink" title="4.2 查看进程线程的方法"></a>4.2 <strong>查看进程线程的方法</strong></h4><p><strong>windows</strong></p>
+<ul>
+<li><p>任务管理器可以查看进程和线程数，也可以用来杀死进程</p>
+</li>
+<li><p>tasklist 查看进程</p>
+</li>
+<li><p>taskkill 杀死进程</p>
+</li>
+</ul>
+<p><strong>linux</strong></p>
+<ul>
+<li><p>ps -fe 查看所有进程</p>
+</li>
+<li><p>ps -fT -p <PID> 查看某个进程（PID）的所有线程</p>
+</li>
+<li><p>kill 杀死进程</p>
+</li>
+<li><p>top 按大写 H 切换是否显示线程</p>
+</li>
+<li><p>top -H -p <PID> 查看某个进程（PID）的所有线程</p>
+</li>
+</ul>
+<p><strong>Java</strong></p>
+<ul>
+<li><p>jps 命令查看所有 Java 进程</p>
+</li>
+<li><p>jstack <PID> 查看某个 Java 进程（PID）的所有线程状态</p>
+</li>
+<li><p>jconsole 来查看某个 Java 进程中线程的运行情况（图形界面）</p>
+</li>
+</ul>
+<p>4.3 <strong>常见方法</strong></p>
+<h5 id="start"><a href="#start" class="headerlink" title="start()"></a>start()</h5><p>启动一个新线程，在新的线程运行 run 方法中的代码</p>
+<p>start 方法只是让线程进入就绪，里面代码不一定立刻运行（CPU 的时间片还没分给它）。每个线程对象的</p>
+<p>start方法只能调用一次，如果调用了多次会出现IllegalThreadStateException</p>
+<h5 id="run"><a href="#run" class="headerlink" title="run()"></a>run()</h5><p>新线程启动后会调用的方法</p>
+<p>如果在构造 Thread 对象时传递了 Runnable 参数，则线程启动后会调用 Runnable 中的 run 方法，否则默</p>
+<p>认不执行任何操作。但可以创建 Thread 的子类对象，来覆盖默认行为</p>
+<h5 id="join"><a href="#join" class="headerlink" title="join()"></a>join()</h5><p>等待线程运行结束</p>
+<h5 id="join-long-n"><a href="#join-long-n" class="headerlink" title="join(long n)"></a>join(long n)</h5><p>等待线程运行结束,最多等待 n 毫秒</p>
+<h5 id="getId"><a href="#getId" class="headerlink" title="getId()"></a>getId()</h5><p>获取线程长整型的 id </p>
+<p>id 唯一</p>
+<h5 id="getName"><a href="#getName" class="headerlink" title="getName()"></a>getName()</h5><p>获取线程名</p>
+<h5 id="setName-String"><a href="#setName-String" class="headerlink" title="setName(String)"></a>setName(String)</h5><p>修改线程名</p>
+<h5 id="getPriority"><a href="#getPriority" class="headerlink" title="getPriority()"></a>getPriority()</h5><p>获取线程优先级</p>
+<h5 id="setPriority-int"><a href="#setPriority-int" class="headerlink" title="setPriority(int)"></a>setPriority(int)</h5><p>修改线程优先级 </p>
+<p>java中规定线程优先级是1~10 的整数，较大的优先级能提高该线程被 CPU 调度的机率</p>
+<h5 id="getState"><a href="#getState" class="headerlink" title="getState()"></a>getState()</h5><p>获取线程状态</p>
+<p>Java 中线程状态是用 6 个 enum 表示，分别为：NEW, RUNNABLE, BLOCKED, WAITING, TIMED_WAITING, TERMINATED</p>
+<h5 id="isInterrupted"><a href="#isInterrupted" class="headerlink" title="isInterrupted()"></a>isInterrupted()</h5><p>判断是否被打断， 不会清除 打断标记</p>
+<h5 id="isAlive"><a href="#isAlive" class="headerlink" title="isAlive()"></a>isAlive()</h5><p>线程是否存活（还没有运行完毕）</p>
+<h5 id="interrupt"><a href="#interrupt" class="headerlink" title="interrupt()"></a>interrupt()</h5><p>打断线程</p>
+<p>如果被打断线程正在 sleep，wait，join 会导致被打断的线程抛出 InterruptedException，并清除 打断标记 ；如果打断的正在运行的线程，则会设置 打断标记 ；park 的线程被打断，也会设置 打断标记</p>
+<h5 id="interrupted-static"><a href="#interrupted-static" class="headerlink" title="interrupted()  static"></a>interrupted()  static</h5><p>判断当前线程是否被打断 会清除 打断标记</p>
+<h5 id="currentThread-static"><a href="#currentThread-static" class="headerlink" title="currentThread()  static"></a>currentThread()  static</h5><p>获取当前正在执行的线程</p>
+<h5 id="sleep-long-n-static"><a href="#sleep-long-n-static" class="headerlink" title="sleep(long n) static"></a>sleep(long n) static</h5><p>让当前执行的线程休眠n毫秒，休眠时让出 cpu 的时间片给其它线程</p>
+<h5 id="yield"><a href="#yield" class="headerlink" title="yield()"></a>yield()</h5><p>static</p>
+<p>提示线程调度器让出当前线程对CPU的使用主要是为了测试和调试</p>
+]]></content>
+  </entry>
+  <entry>
     <title>Hello World</title>
     <url>/2021/04/05/hello-world/</url>
     <content><![CDATA[<p>Welcome to <a href="https://hexo.io/">Hexo</a>! This is your very first post. Check <a href="https://hexo.io/docs/">documentation</a> for more info. If you get any problems when using Hexo, you can find the answer in <a href="https://hexo.io/docs/troubleshooting.html">troubleshooting</a> or you can ask me on <a href="https://github.com/hexojs/hexo/issues">GitHub</a>.</p>

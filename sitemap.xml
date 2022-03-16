@@ -2,13 +2,6 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
-    <loc>http://example.com/2022/01/05/RabbitMQ%E6%80%BB%E7%BB%93/</loc>
-    
-    <lastmod>2022-03-16</lastmod>
-    
-  </url>
-  
-  <url>
     <loc>http://example.com/2021/08/19/JUC%E5%B9%B6%E5%8F%91%E5%8C%85%E5%AD%A6%E4%B9%A0/</loc>
     
     <lastmod>2022-03-16</lastmod>
@@ -16,14 +9,21 @@
   </url>
   
   <url>
-    <loc>http://example.com/2021/11/02/docker%E6%80%BB%E7%BB%93/</loc>
+    <loc>http://example.com/2021/10/15/Centos7%E5%AE%89%E8%A3%85Docker/</loc>
     
     <lastmod>2022-03-16</lastmod>
     
   </url>
   
   <url>
-    <loc>http://example.com/2021/10/15/Centos7%E5%AE%89%E8%A3%85Docker/</loc>
+    <loc>http://example.com/2022/01/05/RabbitMQ%E6%80%BB%E7%BB%93/</loc>
+    
+    <lastmod>2022-03-16</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://example.com/2021/11/02/docker%E6%80%BB%E7%BB%93/</loc>
     
     <lastmod>2022-03-16</lastmod>
     

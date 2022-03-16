@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
-    <title>JUC并发包学习</title>
+    <title>JUC并发包学习（一）</title>
     <url>/2021/08/19/JUC%E5%B9%B6%E5%8F%91%E5%8C%85%E5%AD%A6%E4%B9%A0/</url>
     <content><![CDATA[<h1 id="一-进程与线程"><a href="#一-进程与线程" class="headerlink" title="一. 进程与线程"></a>一. 进程与线程</h1><h3 id="1-进程和线程的概念"><a href="#1-进程和线程的概念" class="headerlink" title="1. 进程和线程的概念"></a>1. 进程和线程的概念</h3><h4 id="进程"><a href="#进程" class="headerlink" title="进程"></a><strong>进程</strong></h4><ul>
 <li><p>程序由指令和数据组成，但这些指令要运行，数据要读写，就必须将指令加载至 CPU，数据加载至内存。在指令运行过程中还需要用到磁盘、网络等设备。进程就是用来加载指令、管理内存、管理 IO 的</p>
@@ -57,12 +57,12 @@
 <p>Java 8 以后可以使用 lambda 精简代码</p>
 <figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">// 创建任务对象</span></span><br><span class="line">Runnable task2 = () -&gt; log.debug(<span class="string">&quot;hello&quot;</span>);</span><br><span class="line"><span class="comment">// 参数1 是任务对象; 参数2 是线程名字，推荐</span></span><br><span class="line">Thread t2 = <span class="keyword">new</span> Thread(task2, <span class="string">&quot;t2&quot;</span>);</span><br><span class="line">t2.start();</span><br></pre></td></tr></table></figure>
 
-<h5 id="原理之-Thread-与-Runnable-的关系"><a href="#原理之-Thread-与-Runnable-的关系" class="headerlink" title="***** 原理之 Thread 与 Runnable 的关系"></a>***** <strong>原理之</strong> <strong>Thread</strong> <strong>与</strong> <strong>Runnable</strong> <strong>的关系</strong></h5><p>分析 Thread 的源码，理清它与 Runnable 的关系</p>
+<h5 id="原理之Thread与-Runnable-的关系"><a href="#原理之Thread与-Runnable-的关系" class="headerlink" title="原理之Thread与 Runnable 的关系"></a>原理之Thread与 Runnable <strong>的关系</strong></h5><p>分析 Thread 的源码，理清它与 Runnable 的关系</p>
 <p><strong>小结</strong></p>
 <p>方法1 是把线程和任务合并在了一起，方法2 是把线程和任务分开了</p>
 <p>用 Runnable 更容易与线程池等高级 API 配合</p>
 <p>用 Runnable 让任务类脱离了 Thread 继承体系，更灵活</p>
-<h5 id="方法三，-FutureTask-配合-Thread"><a href="#方法三，-FutureTask-配合-Thread" class="headerlink" title="方法三，****FutureTask 配合 Thread"></a><strong>方法三，****FutureTask</strong> <strong>配合</strong> <strong>Thread</strong></h5><p>FutureTask 能够接收 Callable 类型的参数，用来处理有返回结果的情况</p>
+<h5 id="方法三，FutureTask配合-Thread"><a href="#方法三，FutureTask配合-Thread" class="headerlink" title="方法三，FutureTask配合 Thread"></a>方法三，FutureTask配合 Thread</h5><p>FutureTask 能够接收 Callable 类型的参数，用来处理有返回结果的情况</p>
 <figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">// 创建任务对象</span></span><br><span class="line">FutureTask&lt;Integer&gt; task3 = <span class="keyword">new</span> FutureTask&lt;&gt;(() -&gt; &#123;</span><br><span class="line"> log.debug(<span class="string">&quot;hello&quot;</span>);</span><br><span class="line"> <span class="keyword">return</span> <span class="number">100</span>;</span><br><span class="line">&#125;);</span><br><span class="line"><span class="comment">// 参数1 是任务对象; 参数2 是线程名字，推荐</span></span><br><span class="line"><span class="keyword">new</span> Thread(task3, <span class="string">&quot;t3&quot;</span>).start();</span><br><span class="line"><span class="comment">// 主线程阻塞，同步等待 task 执行完毕的结果</span></span><br><span class="line">Integer result = task3.get();</span><br><span class="line">log.debug(<span class="string">&quot;结果是:&#123;&#125;&quot;</span>, result);</span><br></pre></td></tr></table></figure>
 
 <h4 id="4-2-查看进程线程的方法"><a href="#4-2-查看进程线程的方法" class="headerlink" title="4.2 查看进程线程的方法"></a>4.2 <strong>查看进程线程的方法</strong></h4><p><strong>windows</strong></p>
@@ -123,6 +123,97 @@
 <h5 id="sleep-long-n-static"><a href="#sleep-long-n-static" class="headerlink" title="sleep(long n) static"></a>sleep(long n) static</h5><p>让当前执行的线程休眠n毫秒，休眠时让出 cpu 的时间片给其它线程</p>
 <h5 id="yield"><a href="#yield" class="headerlink" title="yield()"></a>yield()</h5><p>static</p>
 <p>提示线程调度器让出当前线程对CPU的使用主要是为了测试和调试</p>
+<h5 id="sleep-与-yield"><a href="#sleep-与-yield" class="headerlink" title="sleep 与 yield"></a><strong>sleep</strong> <strong>与</strong> yield</h5><p><strong>sleep</strong></p>
+<ol>
+<li><p>调用 sleep 会让当前线程从 <em>Running</em> 进入 <em>Timed Waiting</em> 状态（阻塞）</p>
+</li>
+<li><p>其它线程可以使用 interrupt 方法打断正在睡眠的线程，这时 sleep 方法会抛出 InterruptedException</p>
+</li>
+<li><p>睡眠结束后的线程未必会立刻得到执行</p>
+</li>
+<li><p>建议用 TimeUnit 的 sleep 代替 Thread 的 sleep 来获得更好的可读性</p>
+</li>
+</ol>
+<p><strong>yield</strong></p>
+<ol>
+<li><p>调用 yield 会让当前线程从 <em>Running</em> 进入 <em>Runnable</em> 就绪状态，然后调度执行其它线程</p>
+</li>
+<li><p>具体的实现依赖于操作系统的任务调度器</p>
+</li>
+</ol>
+<p><strong>线程优先级</strong></p>
+<ul>
+<li><p>线程优先级会提示（hint）调度器优先调度该线程，但它仅仅是一个提示，调度器可以忽略它</p>
+</li>
+<li><p>如果 cpu 比较忙，那么优先级高的线程会获得更多的时间片，但 cpu 闲时，优先级几乎没作用</p>
+</li>
+</ul>
+<h5 id="join方法详解"><a href="#join方法详解" class="headerlink" title="join方法详解"></a>join方法详解</h5><p><strong>为什么需要</strong> <strong>join</strong></p>
+<p>下面的代码执行，打印 r 是什么？</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">static</span> <span class="keyword">int</span> r = <span class="number">0</span>;</span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> InterruptedException </span>&#123;</span><br><span class="line"> test1();</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">test1</span><span class="params">()</span> <span class="keyword">throws</span> InterruptedException </span>&#123;</span><br><span class="line"> log.debug(<span class="string">&quot;开始&quot;</span>);</span><br><span class="line"> Thread t1 = <span class="keyword">new</span> Thread(() -&gt; &#123;</span><br><span class="line"> log.debug(<span class="string">&quot;开始&quot;</span>);</span><br><span class="line"> sleep(<span class="number">1</span>);</span><br><span class="line"> log.debug(<span class="string">&quot;结束&quot;</span>);</span><br><span class="line"> r = <span class="number">10</span>;</span><br><span class="line"> &#125;);</span><br><span class="line"> t1.start();</span><br><span class="line"> log.debug(<span class="string">&quot;结果为:&#123;&#125;&quot;</span>, r);</span><br><span class="line"> log.debug(<span class="string">&quot;结束&quot;</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>分析</p>
+<p>因为主线程和线程 t1 是并行执行的，t1 线程需要 1 秒之后才能算出 r=10</p>
+<p>而主线程一开始就要打印 r 的结果，所以只能打印出 r=0</p>
+<p>解决方法</p>
+<p>用 sleep 行不行？为什么？</p>
+<p>用 join，加在 t1.start() 之后即可</p>
+<h5 id="有时效的-join"><a href="#有时效的-join" class="headerlink" title="有时效的 join"></a><strong>有时效的</strong> join</h5><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">static</span> <span class="keyword">int</span> r1 = <span class="number">0</span>;</span><br><span class="line"><span class="keyword">static</span> <span class="keyword">int</span> r2 = <span class="number">0</span>;</span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> InterruptedException </span>&#123;</span><br><span class="line"> test3();</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">test3</span><span class="params">()</span> <span class="keyword">throws</span> InterruptedException </span>&#123;</span><br><span class="line"> Thread t1 = <span class="keyword">new</span> Thread(() -&gt; &#123;</span><br><span class="line"> sleep(<span class="number">1</span>);</span><br><span class="line"> r1 = <span class="number">10</span>;</span><br><span class="line"> &#125;);</span><br><span class="line"> <span class="keyword">long</span> start = System.currentTimeMillis();</span><br><span class="line"> t1.start();</span><br><span class="line"> <span class="comment">// 线程执行结束会导致 join 结束</span></span><br><span class="line"> t1.join(<span class="number">1500</span>);</span><br><span class="line"> <span class="keyword">long</span> end = System.currentTimeMillis();</span><br><span class="line"> log.debug(<span class="string">&quot;r1: &#123;&#125; r2: &#123;&#125; cost: &#123;&#125;&quot;</span>, r1, r2, end - start);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>没等够时间</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">static</span> <span class="keyword">int</span> r1 = <span class="number">0</span>;</span><br><span class="line"><span class="keyword">static</span> <span class="keyword">int</span> r2 = <span class="number">0</span>;</span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> InterruptedException </span>&#123;</span><br><span class="line"> test3();</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">test3</span><span class="params">()</span> <span class="keyword">throws</span> InterruptedException </span>&#123;</span><br><span class="line"> Thread t1 = <span class="keyword">new</span> Thread(() -&gt; &#123;</span><br><span class="line"> sleep(<span class="number">2</span>);</span><br><span class="line"> r1 = <span class="number">10</span>;</span><br><span class="line"> &#125;);</span><br><span class="line"> <span class="keyword">long</span> start = System.currentTimeMillis();</span><br><span class="line"> t1.start();</span><br><span class="line"> <span class="comment">// 线程执行结束会导致 join 结束</span></span><br><span class="line"> t1.join(<span class="number">1500</span>);</span><br><span class="line"> <span class="keyword">long</span> end = System.currentTimeMillis();</span><br><span class="line"> log.debug(<span class="string">&quot;r1: &#123;&#125; r2: &#123;&#125; cost: &#123;&#125;&quot;</span>, r1, r2, end - start);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h5 id="interrupt-方法详解"><a href="#interrupt-方法详解" class="headerlink" title="interrupt 方法详解"></a><strong>interrupt</strong> 方法详解</h5><p>打断<strong>sleep</strong>，<strong>wait</strong>，**join **的线程</p>
+<p>这几个方法都会让线程进入阻塞状态</p>
+<p>打断 sleep 的线程, 会清空打断状态，以 sleep 为例</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">test1</span><span class="params">()</span> <span class="keyword">throws</span> InterruptedException </span>&#123;</span><br><span class="line"> Thread t1 = <span class="keyword">new</span> Thread(()-&gt;&#123;</span><br><span class="line"> sleep(<span class="number">1</span>);</span><br><span class="line"> &#125;, <span class="string">&quot;t1&quot;</span>);</span><br><span class="line"> t1.start();</span><br><span class="line"> sleep(<span class="number">0.5</span>);</span><br><span class="line"> t1.interrupt();</span><br><span class="line"> log.debug(<span class="string">&quot; 打断状态: &#123;&#125;&quot;</span>, t1.isInterrupted());</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>输出</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">java.lang.InterruptedException: sleep interrupted</span><br><span class="line"> at java.lang.Thread.sleep(Native Method)</span><br><span class="line"> at java.lang.Thread.sleep(Thread.java:<span class="number">340</span>)</span><br><span class="line"> at java.util.concurrent.TimeUnit.sleep(TimeUnit.java:<span class="number">386</span>)</span><br><span class="line"> at cn.itcast.n2.util.Sleeper.sleep(Sleeper.java:<span class="number">8</span>)</span><br><span class="line"> at cn.itcast.n4.TestInterrupt.lambda$test1$<span class="number">3</span>(TestInterrupt.java:<span class="number">59</span>)</span><br><span class="line"> at java.lang.Thread.run(Thread.java:<span class="number">745</span>)</span><br><span class="line"><span class="number">21</span>:<span class="number">18</span>:<span class="number">10.374</span> [main] c.TestInterrupt - 打断状态: <span class="keyword">false</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>打断正常运行的线程</strong></p>
+<p>打断正常运行的线程, 不会清空打断状态</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">test2</span><span class="params">()</span> <span class="keyword">throws</span> InterruptedException </span>&#123;</span><br><span class="line"> Thread t2 = <span class="keyword">new</span> Thread(()-&gt;&#123;</span><br><span class="line"> <span class="keyword">while</span>(<span class="keyword">true</span>) &#123;</span><br><span class="line"> Thread current = Thread.currentThread();</span><br><span class="line"> <span class="keyword">boolean</span> interrupted = current.isInterrupted();</span><br><span class="line"> <span class="keyword">if</span>(interrupted) &#123;</span><br><span class="line"> log.debug(<span class="string">&quot; 打断状态: &#123;&#125;&quot;</span>, interrupted);</span><br><span class="line"> <span class="keyword">break</span>;</span><br><span class="line"> &#125;</span><br><span class="line"> &#125;</span><br><span class="line"> &#125;, <span class="string">&quot;t2&quot;</span>);</span><br><span class="line"> t2.start();</span><br><span class="line"> sleep(<span class="number">0.5</span>);</span><br><span class="line"> t2.interrupt();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h5 id="模式之两阶段终止"><a href="#模式之两阶段终止" class="headerlink" title="模式之两阶段终止"></a>模式之两阶段终止</h5><p><strong>打断</strong> <strong>park</strong> <strong>线程</strong></p>
+<p>打断 park 线程, 不会清空打断状态</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">test3</span><span class="params">()</span> <span class="keyword">throws</span> InterruptedException </span>&#123;</span><br><span class="line"> Thread t1 = <span class="keyword">new</span> Thread(() -&gt; &#123;</span><br><span class="line"> log.debug(<span class="string">&quot;park...&quot;</span>);</span><br><span class="line"> LockSupport.park();</span><br><span class="line"> log.debug(<span class="string">&quot;unpark...&quot;</span>);</span><br><span class="line"> log.debug(<span class="string">&quot;打断状态：&#123;&#125;&quot;</span>, Thread.currentThread().isInterrupted());</span><br><span class="line"> &#125;, <span class="string">&quot;t1&quot;</span>);</span><br><span class="line"> t1.start();</span><br><span class="line"> sleep(<span class="number">0.5</span>);</span><br><span class="line"> t1.interrupt();</span><br><span class="line">&#125;</span><br><span class="line"><span class="number">21</span>:<span class="number">11</span>:<span class="number">52.795</span> [t1] c.TestInterrupt - park... </span><br><span class="line"><span class="number">21</span>:<span class="number">11</span>:<span class="number">53.295</span> [t1] c.TestInterrupt - unpark... </span><br><span class="line"><span class="number">21</span>:<span class="number">11</span>:<span class="number">53.295</span> [t1] c.TestInterrupt - 打断状态：<span class="keyword">true</span></span><br></pre></td></tr></table></figure>
+
+<p>如果打断标记已经是 true, 则 park 会失效</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">test4</span><span class="params">()</span> </span>&#123;</span><br><span class="line"> Thread t1 = <span class="keyword">new</span> Thread(() -&gt; &#123;</span><br><span class="line"> <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; <span class="number">5</span>; i++) &#123;</span><br><span class="line"> log.debug(<span class="string">&quot;park...&quot;</span>);</span><br><span class="line"> LockSupport.park();</span><br><span class="line"> log.debug(<span class="string">&quot;打断状态：&#123;&#125;&quot;</span>, Thread.currentThread().isInterrupted());</span><br><span class="line"> &#125;</span><br><span class="line"> &#125;);</span><br><span class="line"> t1.start();</span><br><span class="line"> sleep(<span class="number">1</span>);</span><br><span class="line"> t1.interrupt();</span><br><span class="line">&#125;</span><br><span class="line"><span class="number">21</span>:<span class="number">13</span>:<span class="number">48.783</span> [Thread-<span class="number">0</span>] c.TestInterrupt - park... </span><br><span class="line"><span class="number">21</span>:<span class="number">13</span>:<span class="number">49.809</span> [Thread-<span class="number">0</span>] c.TestInterrupt - 打断状态：<span class="keyword">true</span> </span><br><span class="line"><span class="number">21</span>:<span class="number">13</span>:<span class="number">49.812</span> [Thread-<span class="number">0</span>] c.TestInterrupt - park... </span><br><span class="line"><span class="number">21</span>:<span class="number">13</span>:<span class="number">49.813</span> [Thread-<span class="number">0</span>] c.TestInterrupt - 打断状态：<span class="keyword">true</span> </span><br><span class="line"><span class="number">21</span>:<span class="number">13</span>:<span class="number">49.813</span> [Thread-<span class="number">0</span>] c.TestInterrupt - park... </span><br><span class="line"><span class="number">21</span>:<span class="number">13</span>:<span class="number">49.813</span> [Thread-<span class="number">0</span>] c.TestInterrupt - 打断状态：<span class="keyword">true</span> </span><br><span class="line"><span class="number">21</span>:<span class="number">13</span>:<span class="number">49.813</span> [Thread-<span class="number">0</span>] c.TestInterrupt - park... </span><br><span class="line"><span class="number">21</span>:<span class="number">13</span>:<span class="number">49.813</span> [Thread-<span class="number">0</span>] c.TestInterrupt - 打断状态：<span class="keyword">true</span> </span><br><span class="line"><span class="number">21</span>:<span class="number">13</span>:<span class="number">49.813</span> [Thread-<span class="number">0</span>] c.TestInterrupt - park... </span><br><span class="line"><span class="number">21</span>:<span class="number">13</span>:<span class="number">49.813</span> [Thread-<span class="number">0</span>] c.TestInterrupt - 打断状态：<span class="keyword">true</span></span><br></pre></td></tr></table></figure>
+
+<p>提示</p>
+<p>可以使用 Thread.interrupted() 清除打断状态</p>
+<p>还有一些不推荐使用的方法，这些方法已过时，容易破坏同步代码块，造成线程死锁</p>
+<p>stop()     停止线程运行</p>
+<p>suspend()       挂起线程运行</p>
+<p>resume()        恢复线程运行</p>
+<h4 id="操作系统线程状态"><a href="#操作系统线程状态" class="headerlink" title="操作系统线程状态"></a>操作系统线程状态</h4><ul>
+<li><p>【初始状态】仅是在语言层面创建了线程对象，还未与操作系统线程关联</p>
+</li>
+<li><p>【可运行状态】（就绪状态）指该线程已经被创建（与操作系统线程关联），可以由 CPU 调度执行</p>
+</li>
+<li><p>【运行状态】指获取了 CPU 时间片运行中的状态，当 CPU 时间片用完，会从【运行状态】转换至【可运行状态】，会导致线程的上下文切换</p>
+</li>
+<li><p>【阻塞状态】如果调用了阻塞 API，如 BIO 读写文件，这时该线程实际不会用到 CPU，会导致线程上下文切换，进入【阻塞状态】，等 BIO 操作完毕，会由操作系统唤醒阻塞的线程，转换至【可运行状态】与【可运行状态】的区别是，对【阻塞状态】的线程来说只要它们一直不唤醒，调度器就一直不会考虑调度它们</p>
+</li>
+<li><p>【终止状态】表示线程已经执行完毕，生命周期已经结束，不会再转换为其它状态</p>
+</li>
+</ul>
+<h4 id="Java-API层面线程状态"><a href="#Java-API层面线程状态" class="headerlink" title="Java API层面线程状态"></a>Java API层面线程状态</h4><ul>
+<li><p>NEW 线程刚被创建，但是还没有调用 start() 方法</p>
+</li>
+<li><p>RUNNABLE 当调用了 start() 方法之后，注意，<strong>Java API</strong> 层面的 RUNNABLE 状态涵盖了 <strong>操作系统</strong> 层面的</p>
+</li>
+</ul>
+<p>【可运行状态】、【运行状态】和【阻塞状态】（由于 BIO 导致的线程阻塞，在 Java 里无法区分，仍然认为</p>
+<p>是可运行）</p>
+<ul>
+<li><p>BLOCKED ， WAITING ， TIMED_WAITING 都是 <strong>Java API</strong> 层面对【阻塞状态】的细分</p>
+</li>
+<li><p>TERMINATED 当线程代码运行结束</p>
+</li>
+</ul>
 ]]></content>
       <tags>
         <tag>juc</tag>

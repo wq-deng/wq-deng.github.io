@@ -67,7 +67,7 @@
 
   <url>
     <loc>https://wq-deng.github.io/</loc>
-    <lastmod>2022-03-19</lastmod>
+    <lastmod>2022-06-19</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
   </url>
@@ -75,21 +75,21 @@
   
   <url>
     <loc>https://wq-deng.github.io/tags/docker/</loc>
-    <lastmod>2022-03-19</lastmod>
+    <lastmod>2022-06-19</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   
   <url>
     <loc>https://wq-deng.github.io/tags/juc/</loc>
-    <lastmod>2022-03-19</lastmod>
+    <lastmod>2022-06-19</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   
   <url>
     <loc>https://wq-deng.github.io/tags/RabbitMQ/</loc>
-    <lastmod>2022-03-19</lastmod>
+    <lastmod>2022-06-19</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
